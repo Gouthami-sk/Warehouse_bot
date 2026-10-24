@@ -86,7 +86,7 @@ All four strategies train for the same 30,000 episodes. The decay run is compare
 - **Too much exploration fails:** With ε = 0.95 the bot does not learn a usable route. Played greedily from the start, it delivers in 0 of 5 seeds and runs into the step limit.
 - **Decay is not faster early:** Decay starts at ε = 1.0, so it spends its first episodes exploring. Fixed 0.1 has the better whole-run average (−185.4 against −983.2), and the decay run only becomes profitable around episode 22,350, once ε is close to its floor. Decay trades a slow start for the best final training return.
 
->>**Note:** Training always starts the bot at (0, 0), so the Q-table is most reliable along the route from the start. Starting the bot from distant cells (using the click test) can fail in places training rarely visited.
+>**Note:** Training always starts the bot at (0, 0), so the Q-table is most reliable along the route from the start. Starting the bot from distant cells (using the click test) can fail in places training rarely visited.
 
 ## Getting Started
 
@@ -111,7 +111,6 @@ python plot_training.py --save training_curve.png
 
 ## Future Scope
 
-- Random starting positions during training, so the bot can deliver from anywhere in the warehouse.
 - Multiple packages and multiple delivery bays.
 - Moving obstacles such as other robots or forklifts.
 - A learning-rate schedule alongside the epsilon schedule.
