@@ -24,7 +24,7 @@ The system is split into a small number of files, each with one job:
 | Start cell | (0, 0) |
 | Package | (12, 37) |
 | Delivery bay | (49, 49) |
-| Shelf cells (obstacles) | 250 (about 10% of the grid) |
+| Shelf cells (obstacles) | 250 (10% of the grid) |
 | Step limit per episode | 300 |
 | Number of states | 5,000 |
 | Actions | Up, Down, Left, Right |
