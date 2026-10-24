@@ -1,4 +1,4 @@
-# Warehouse Bot: Epsilon Strategy Study on a 50×50 Grid
+# Warehouse Bot: Epsilon Strategy Study on a Agent in 50×50 Grid
 
 A Python simulation of a Q-learning warehouse robot that learns to pick up a package and deliver it to a bay, used to compare a decaying exploration rate against fixed exploration rates on a large grid.
 
@@ -6,13 +6,11 @@ A Python simulation of a Q-learning warehouse robot that learns to pick up a pac
 
 On a large warehouse the choice of epsilon matters: the package is far from the start, the bay is farther still, and a bot that explores too much may never learn the full route. This project trains the same tabular Q-learning agent on a 50×50 warehouse with four exploration strategies (a decaying epsilon and three fixed values) and measures how each one affects learning speed, training reward, and the final delivery route.
 
-No neural network is involved. The agent learns a plain Q-table, which makes every learned value inspectable.
-
 ## Core Architecture
 
 The system is split into a small number of files, each with one job:
 
-- **Environment (`env.py`):** The 50×50 warehouse. It defines the shelves, the start cell, the package, the delivery bay, the rewards, and the step limit. It contains no learning.
+- **Environment (`env.py`):** The 50×50 warehouse. It defines the shelves, the start cell, the package, the delivery bay, the rewards, and the step limit.
 - **Learning (`qlearning.py`):** The Q-table, epsilon-greedy action selection, the epsilon schedule, and the training loop.
 - **Fixed-epsilon baseline (`train_fixed.py`):** Trains the same agent with a constant epsilon, for comparison against the decaying schedule.
 - **Testing (`test_bot.py`, `test_bot_click.py`):** Loads a saved Q-table and plays greedily (epsilon = 0). The click version lets you choose any starting square and watch the bot deliver from there.
@@ -89,9 +87,7 @@ All four strategies train for the same 30,000 episodes. The decay run is compare
 - **Too much exploration fails:** With ε = 0.95 the bot does not learn a usable route. Played greedily from the start, it delivers in 0 of 5 seeds and runs into the step limit.
 - **Decay is not faster early:** Decay starts at ε = 1.0, so it spends its first episodes exploring. Fixed 0.1 has the better whole-run average (−185.4 against −983.2), and the decay run only becomes profitable around episode 22,350, once ε is close to its floor. Decay trades a slow start for the best final training return.
 
-![Epsilon comparison](compare_epsilon_50.png)
-
-**Note:** Training always starts the bot at (0, 0), so the Q-table is most reliable along the route from the start. Starting the bot from distant cells (using the click test) can fail in places training rarely visited.
+>>**Note:** Training always starts the bot at (0, 0), so the Q-table is most reliable along the route from the start. Starting the bot from distant cells (using the click test) can fail in places training rarely visited.
 
 ## Getting Started
 
