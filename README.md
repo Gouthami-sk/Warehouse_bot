@@ -15,8 +15,7 @@ The system is split into a small number of files, each with one job:
 - **Fixed-epsilon baseline (`train_fixed.py`):** Trains the same agent with a constant epsilon, for comparison against the decaying schedule.
 - **Testing (`test_bot.py`, `test_bot_click.py`):** Loads a saved Q-table and plays greedily (epsilon = 0). The click version lets you choose any starting square and watch the bot deliver from there.
 - **Analysis (`compare_epsilon.py`, `plot_training.py`):** Produces the comparison table, bar charts, training curves and the best-move arrow maps.
-- **Drawing (`visual.py`):** Renders the grid, shelves, package, bay, bot and its trail.
-
+- 
 ## The Warehouse
 
 | Item | Value |
