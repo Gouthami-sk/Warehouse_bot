@@ -1,15 +1,18 @@
-# Warehouse_bot: Epsilon Strategy Study on a Agent in 50×50 Grid
+# Warehouse Bot: Epsilon Strategy Study on a 50×50 Grid
+
 A Python simulation of a Q-learning warehouse robot that learns to pick up a package and deliver it to a bay, used to compare a decaying exploration rate against fixed exploration rates on a large grid.
 
 ## About
 
-On a small grid, almost any exploration setting finds the route, so the choice of epsilon barely matters. A large warehouse is different: the package is far from the start, the bay is farther still, and a bot that explores too much never gets far enough to learn the full route. This project trains the same tabular Q-learning agent on a 50×50 warehouse with four exploration strategies (a decaying epsilon and three fixed values) and measures how each one affects learning speed, training reward, and the final delivery route.
+On a large warehouse the choice of epsilon matters: the package is far from the start, the bay is farther still, and a bot that explores too much may never learn the full route. This project trains the same tabular Q-learning agent on a 50×50 warehouse with four exploration strategies (a decaying epsilon and three fixed values) and measures how each one affects learning speed, training reward, and the final delivery route.
+
+No neural network is involved. The agent learns a plain Q-table, which makes every learned value inspectable.
 
 ## Core Architecture
 
 The system is split into a small number of files, each with one job:
 
-- **Environment (`env.py`):** The 50×50 warehouse. It defines the shelves, the start cell, the package, the delivery bay, the rewards, and the step limit. 
+- **Environment (`env.py`):** The 50×50 warehouse. It defines the shelves, the start cell, the package, the delivery bay, the rewards, and the step limit. It contains no learning.
 - **Learning (`qlearning.py`):** The Q-table, epsilon-greedy action selection, the epsilon schedule, and the training loop.
 - **Fixed-epsilon baseline (`train_fixed.py`):** Trains the same agent with a constant epsilon, for comparison against the decaying schedule.
 - **Testing (`test_bot.py`, `test_bot_click.py`):** Loads a saved Q-table and plays greedily (epsilon = 0). The click version lets you choose any starting square and watch the bot deliver from there.
@@ -69,21 +72,22 @@ The shortest possible route from the start to the package and on to the bay is *
 
 ## Outcome
 
-All four strategies train for the same number of episodes. The decay run is compared against fixed ε = 0.1, 0.5 and 0.95. Results are averaged over multiple seeds.
+All four strategies train for the same 30,000 episodes. The decay run is compared against fixed ε = 0.1, 0.5 and 0.95. Results are the mean of 5 seeds (± is the standard deviation across seeds).
 
 | Metric | Decay (1.0 → 0.01) | Fixed 0.1 | Fixed 0.5 | Fixed 0.95 |
 |---|---|---|---|---|
-| Final training return (last 10% of episodes) | TBD | TBD | TBD | TBD |
-| Whole-run average return | TBD | TBD | TBD | TBD |
-| Episodes until return stays above 0 | TBD | TBD | TBD | TBD |
-| Greedy test from start: delivered | TBD | TBD | TBD | TBD |
-| Greedy test from start: steps (shortest = 98) | TBD | TBD | TBD | TBD |
+| Final training return (last 3,000 episodes) | **13.5 ± 1.9** | −66.9 ± 15.7 | −979.8 ± 25.7 | −2827.8 ± 10.6 |
+| Whole-run average return | −983.2 | **−185.4** | −1016.3 | −3010.8 |
+| Episode from which the moving average (300 episodes) stays above 0 | 22,352 on average (5 of 5 seeds) | never | never | never |
+| Greedy test from start: delivered | 5 of 5 | 5 of 5 | 5 of 5 | 0 of 5 |
+| Greedy test from start: mean steps (shortest = 98) | 98 | 98 | 98 | not delivered (300-step limit) |
 
 **Key observations:**
 
-- **Exploration cost:** Training return measures what the bot earns while it is still exploring. A strategy that keeps exploring heavily keeps paying for it in collisions and wasted moves, even after the Q-table is good.
-- **Too much exploration:** With ε = 0.95 the bot almost never reaches the package by chance on a grid this size, so the route is not learned reliably. *(TBD: confirm against final numbers.)*
-- **Decay advantage:** A decaying schedule explores widely at first and then exploits what it found, which keeps the training return high at the end of the run. *(TBD: confirm against final numbers.)*
+- **Decay ends best:** The decay run is the only one that finishes with a positive training return (+13.5, against a best possible 24). The fixed strategies end at −66.9, −979.8 and −2827.8.
+- **Fixed ε keeps paying for exploration:** Fixed 0.1 and 0.5 also learn the shortest 98-step route, but while training they keep taking random moves, which means collisions and wasted steps. Their training return does not stay positive.
+- **Too much exploration fails:** With ε = 0.95 the bot does not learn a usable route. Played greedily from the start, it delivers in 0 of 5 seeds and runs into the step limit.
+- **Decay is not faster early:** Decay starts at ε = 1.0, so it spends its first episodes exploring. Fixed 0.1 has the better whole-run average (−185.4 against −983.2), and the decay run only becomes profitable around episode 22,350, once ε is close to its floor. Decay trades a slow start for the best final training return.
 
 ![Epsilon comparison](compare_epsilon_50.png)
 
@@ -99,13 +103,7 @@ pip install -r requirements.txt
 
 ### Run
 
-Set the grid size once in your terminal (Linux / macOS):
-
-```
-export WAREHOUSE_SIZE=50
-```
-
-Then run, in order:
+Run, in order:
 
 ```
 python qlearning.py                 # train with decaying epsilon -> q_table.npy
@@ -118,6 +116,7 @@ python plot_training.py --save training_curve.png
 
 ## Future Scope
 
+- Random starting positions during training, so the bot can deliver from anywhere in the warehouse.
 - Multiple packages and multiple delivery bays.
 - Moving obstacles such as other robots or forklifts.
 - A learning-rate schedule alongside the epsilon schedule.
