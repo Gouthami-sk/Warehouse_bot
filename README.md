@@ -10,7 +10,7 @@ On a large warehouse the package is far from the start and the bay is farther st
 
 The system is split into a small number of files, each with one job:
 
-- **Environment (`env.py`):** The 50×50 warehouse. It defines the shelves, the start cell, the package, the delivery bay, the rewards, and the step limit. It contains no learning.
+- **Environment (`env.py`):** The 50×50 warehouse. It defines the shelves, the start cell, the package, the delivery bay, the rewards, and the step limit.
 - **Learning (`qlearning.py`):** The Q-table, epsilon-greedy action selection, the epsilon schedule, the starting-square mix, and the training loop.
 - **Fixed-epsilon baseline (`train_fixed.py`):** Trains the same agent with a constant epsilon, for comparison against the decaying schedule.
 - **Testing (`test_bot.py`, `test_bot_click.py`):** Loads a saved Q-table and plays greedily (epsilon = 0). The click version lets you choose any starting square and watch the bot deliver from there.
@@ -123,8 +123,6 @@ The share of random-start episodes is `RANDOM_START_FRACTION` in `qlearning.py`.
 
 ## Future Scope
 
-- Comparing the exploration strategies when training starts only from the start cell.
-- Multiple packages and multiple delivery bays.
 - Moving obstacles such as other robots or forklifts.
 - A learning-rate schedule alongside the epsilon schedule.
 - Replacing the Q-table with a neural network (DQN) for larger or continuous warehouses.
