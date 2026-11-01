@@ -51,13 +51,18 @@ def moving_average(values, window):
     return np.convolve(values, kernel, mode="valid")
 
 
-def draw_curve(ax, returns):
-    """Reward per episode (faint), its moving average (bold) and epsilon (second axis)."""
-    episodes = np.arange(len(returns))
-    ax.plot(episodes, returns, color="lightsteelblue", linewidth=0.5, label="return per episode")
-    window = WINDOW if len(returns) < 5000 else 200
-    smooth = moving_average(returns, window)
-    ax.plot(np.arange(window - 1, len(returns)), smooth, color="tab:blue", linewidth=2,
+def draw_curve(ax, returns, mask=None):
+    """Return of the episodes that began at the start cell (faint), its moving average (bold)
+    and epsilon (second axis). Random-start episodes are left out: their return depends on where
+    they began, so they cannot be compared with the best possible return."""
+    if mask is None:
+        mask = np.ones(len(returns), dtype=bool)
+    idx = np.flatnonzero(mask)                 # episode numbers of the start-cell episodes
+    from_start = returns[idx]
+    ax.plot(idx, from_start, color="lightsteelblue", linewidth=0.5, label="return per start-cell episode")
+    window = WINDOW if len(from_start) < 5000 else 200
+    smooth = moving_average(from_start, window)
+    ax.plot(idx[window - 1:], smooth, color="tab:blue", linewidth=2,
             label=f"moving average ({window} episodes)")
     ax.axhline(OPTIMAL_RETURN, color="tab:green", linestyle="--", label=f"best possible ({OPTIMAL_RETURN})")
     ax.axhline(RANDOM_BASELINE, color="tab:red", linestyle="--", label=f"random agent ({RANDOM_BASELINE:.0f})")
@@ -65,6 +70,7 @@ def draw_curve(ax, returns):
     ax.set_ylabel("return")
     ax.set_title("Training progress")
 
+    episodes = np.arange(len(returns))
     eps_ax = ax.twinx()
     eps_ax.plot(episodes, [qlearning.epsilon_for(e) for e in episodes],
                 color="tab:orange", linewidth=1.5, label="epsilon")
@@ -123,12 +129,13 @@ def main():
     if "--save" in sys.argv:
         plt.switch_backend("Agg")
     random.seed(qlearning.SEED)
-    q_table, returns = qlearning.train()
+    mask = []
+    q_table, returns = qlearning.train(fixed_start_mask=mask)
 
     side = 10 if SIZE <= 20 else 18
     fig = plt.figure(figsize=(side, side * 0.9))
     grid = fig.add_gridspec(2, 2)
-    draw_curve(fig.add_subplot(grid[0, :]), returns)
+    draw_curve(fig.add_subplot(grid[0, :]), returns, np.array(mask))
     draw_policy(fig.add_subplot(grid[1, 0]), q_table, False, "Best move: bot WITHOUT the package")
     draw_policy(fig.add_subplot(grid[1, 1]), q_table, True, "Best move: bot WITH the package")
     fig.tight_layout()
